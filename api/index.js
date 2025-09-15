@@ -35,6 +35,15 @@ app.use(async (req, res, next) => {
   }
 });
 
+// Simple health and root endpoints for diagnostics
+app.get('/', (req, res) => {
+  res.status(200).json({ message: 'Student Mentoring API running', connectedToDb: isConnected });
+});
+
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'ok', db: isConnected ? 'connected' : 'disconnected', time: new Date().toISOString() });
+});
+
 // Mount without /api because Vercel prefixes it
 app.use('/auth', authRoutes);
 app.use('/meetings', meetingRoutes);
