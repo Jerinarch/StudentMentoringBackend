@@ -15,6 +15,12 @@ app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+// lightweight request logger for debugging
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
 let isConnected = false;
 async function connectToDatabase() {
   if (isConnected) return;
@@ -42,6 +48,14 @@ app.get('/', (req, res) => {
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', db: isConnected ? 'connected' : 'disconnected', time: new Date().toISOString() });
+});
+
+// Config probe (safe values only)
+app.get('/config', (req, res) => {
+  res.status(200).json({
+    hasMongoUri: Boolean(process.env.MONGODB_URI),
+    nodeEnv: process.env.NODE_ENV || 'development'
+  });
 });
 
 // Mount without /api because Vercel prefixes it
